@@ -65,13 +65,26 @@ module.exports.createProductController = async (req,res) =>{
 
 module.exports.getAllProducts = async (req,res) => {
     try {
-        const productData = await productModel.find();
+        const page = req.query.page;
+        const limit = 10;
+        const skip = (page-1)*limit;
+        const productData = await productModel.find().skip(skip).limit(limit);
+
+        const availableProducts = await productModel.find();
+        
+        
 
         if(productData.length < 1){
-            res.status(404).json({message : "No product found"});
+            return res.status(404).json({message : "No product found"});
         }
 
-        res.status(200).json({message : "Product data found" , productData});
+        res
+          .status(200)
+          .json({
+            message: "Product data found",
+            availableProducts: availableProducts.length,
+            productData,
+          });
 
     } catch (error) {
         console.log(error);
